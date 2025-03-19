@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Machine Game</title>
+    <style>
+        /* ======= General Styles ======= */
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* ======= Slot Machine Container ======= */
+.slot-machine {
+    width: 320px;
+    height: 300px;
+    border: 4px solid gold;
+    background: #333;
+    border-radius: 10px;
+    box-shadow: 0 0 15px gold;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+/* ======= Reel Styles (Menyesuaikan agar vertikal rapi) ======= */
+.reel {
+    width: 100px;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid #fff;
+    background: #222;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ======= Symbols Container (Vertical Layout) ======= */
+.reel .symbols {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    transition: transform 1s ease-in-out;
+}
+
+/* ======= Symbol (Menyesuaikan supaya sejajar vertikal) ======= */
+.symbol {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    border-bottom: 2px solid #fff;
+}
+
+/* ======= Symbol Image (Ukuran Seragam) ======= */
+.symbol img {
+    width: 90%;
+    height: 90%;
+    object-fit: contain;
+    display: block;
+}
+
+/* ======= Controls Section ======= */
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 15px;
+    border: 2px solid gold;
+    background: #333;
+    border-radius: 8px;
+    box-shadow: 0 0 12px gold;
+    margin-top: 10px;
+}
+
+.balance {
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+.bet {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+}
+
+/* ======= Jackpot Text ======= */
+.jackpot {
+    font-size: 1.8em;
+    color: red;
+    font-weight: bold;
+    display: none;
+    animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* ======= Bottom Controls ======= */
+.bottom-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* ======= Buttons Styling ======= */
+button {
+    padding: 8px 16px;
+    font-size: 1em;
+    background-color: #ffcc00;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 8px rgba(255, 204, 0, 0.5);
+    text-transform: uppercase;
+    outline: none;
+}
+
+button:hover {
+    background-color: #ff9900;
+    box-shadow: 0 3px 12px rgba(255, 153, 0, 0.7);
+    transform: scale(1.05);
+}
+
+button:active {
+    background-color: #cc7a00;
+    transform: scale(0.95);
+}
+
+/* ======= Spin Button Special Style ======= */
+.spin-button {
+    border-radius: 40px;
+    width: 120px;
+    height: 45px;
+    font-size: 1.1em;
+}
+
+/* ======= Responsive Design for Mobile ======= */
+@media (max-width: 480px) {
+    .slot-machine {
+        width: 90%;
+        height: 250px;
+    }
+
+    .reel {
+        width: 28%;
+    }
+
+    .symbol {
+        width: 100%;
+        height: 75px;
+    }
+
+    .symbol img {
+        width: 80%;
+        height: 80%;
+        object-fit: contain;
+    }
+
+    .controls {
+        padding: 12px;
+    }
+
+    button {
+        font-size: 0.9em;
+        padding: 8px 14px;
+    }
+
+    .spin-button {
+        width: 110px;
+        font-size: 1em;
+        height: 42px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="slot-machine">
+        <div class="reel"><div class="symbols" id="reel1"></div></div>
+        <div class="reel"><div class="symbols" id="reel2"></div></div>
+        <div class="reel"><div class="symbols" id="reel3"></div></div>
+    </div>
+    <div class="controls">
+        <div class="balance">Balance: $<span id="balance">100</span></div>
+        <div class="bet">
+            Bet: $ 
+            <button onclick="adjustBet(-5)">-</button>
+            <input type="number" id="betAmount" value="10" min="1" max="100" readonly>
+            <button onclick="adjustBet(5)">+</button>
+            <button onclick="maxBet()">Max Bet</button>
+        </div>
+        <h2 id="result"></h2>
+        <div class="jackpot" id="jackpot">🎉 JACKPOT!!! 🎉</div>
+        <div class="bottom-controls">
+            <button onclick="spin()" class="spin-button">Spin 🎲</button>
+            <button onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+
+    <script> 
+        let balance = 100;
+        const symbols = ["bitok.png", "bel.png", "popon.png", "grape.png", "star.png", "boling.png"];
+
+        function fillReel(reelId) {
+            let reel = document.getElementById(reelId);
+            reel.innerHTML = "";
+            let shuffledSymbols = [...symbols, ...symbols, ...symbols].sort(() => Math.random() - 0.5);
+            shuffledSymbols.forEach(symbol => {
+                reel.innerHTML += `<div class='symbol'><img src='images/${symbol}' alt='${symbol}'></div>`;
+            });
+            reel.innerHTML += reel.innerHTML;
+        }
+
+        fillReel("reel1");
+        fillReel("reel2");
+        fillReel("reel3");
+
+        function adjustBet(amount) {
+            let betInput = document.getElementById("betAmount");
+            let newBet = parseInt(betInput.value) + amount;
+            if (newBet >= 1 && newBet <= balance) {
+                betInput.value = newBet;
+            }
+        }
+
+        function maxBet() {
+            document.getElementById("betAmount").value = balance;
+        }
+
+        function spin() {
+            let bet = parseInt(document.getElementById("betAmount").value);
+            if (bet > balance || bet <= 0) {
+                alert("Invalid bet amount!");
+                return;
+            }
+            balance -= bet;
+            document.getElementById("balance").textContent = balance;
+            document.getElementById("jackpot").style.display = "none";
+            let result = document.getElementById("result");
+            result.textContent = "Spinning...";
+            result.style.color = "white";
+
+            ["reel1", "reel2", "reel3"].forEach(reelId => {
+                let reel = document.getElementById(reelId);
+                reel.style.transition = "transform 1.5s ease-out";
+                let position = Math.floor(Math.random() * symbols.length) * -100;
+                reel.style.transform = `translateY(${position}px)`;
+            });
+
+            setTimeout(() => {
+                let winningSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                if (winningSymbol === "star.png") {
+                    balance += bet * 10;
+                    document.getElementById("balance").textContent = balance;
+                    document.getElementById("jackpot").style.display = "block";
+                    result.textContent = "🎉 JACKPOT!!! 🎉";
+                    result.style.color = "gold";
+                } else {
+                    result.textContent = "Try Again!";
+                    result.style.color = "red";
+                }
+            }, 1500);
+        }
+
+        function resetGame() {
+            balance = 100;
+            document.getElementById("balance").textContent = balance;
+            document.getElementById("betAmount").value = 10;
+            document.getElementById("result").textContent = "";
+            document.getElementById("jackpot").style.display = "none";
+        }
+    </script>
+</body>
+</html> 
